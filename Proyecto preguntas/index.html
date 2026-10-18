@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ranking Cazadores de Puntos</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7cc8ff">
+<style>
+:root{--ink:#1d3557;--mut:#4f6d8f;--card:rgba(255,255,255,.88);--ln:#d6e6f5;--th:#fff0d2;--ac:#ff7a2f;--hd:rgba(255,255,255,.72);--dlg:#fff;--nv:#1a1030;--glow:#ff9a3c88}
+[data-t=dark]{--ink:#e8eeff;--mut:#9aa8d6;--card:rgba(12,18,48,.86);--ln:#26305e;--th:#18224d;--ac:#2f7bff;--hd:rgba(6,10,36,.72);--dlg:#10173f;--nv:#06113a;--glow:#19d8ff88}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;color:var(--ink);min-height:100vh}
+.sky{position:fixed;inset:0;z-index:-1;transition:opacity .9s}
+#day{background:radial-gradient(circle at 12% 8%,#fff8c9 0,#ffe27a 5%,#ffe27a00 22%),radial-gradient(ellipse 170px 50px at 70% 18%,#fff 0,#fff0 70%),radial-gradient(ellipse 230px 60px at 25% 45%,#ffffffd0 0,#fff0 70%),radial-gradient(ellipse 190px 50px at 85% 70%,#ffffffc0 0,#fff0 70%),linear-gradient(#7cc8ff,#d9f0ff 70%,#f4fbff)}
+#night{opacity:0;background:radial-gradient(circle at 86% 10%,#eaf2ff 0,#b4c8ff 2%,#7f9cff33 7%,#0000 16%),linear-gradient(#03061a,#0b1240 60%,#1a1f5c)}
+[data-t=dark] #night{opacity:1}
+.st{position:absolute;inset:0}
+#s1,#s1g{background-image:radial-gradient(1.5px 1.5px at 20px 30px,#fff,#0000),radial-gradient(1px 1px at 90px 80px,#fff,#0000),radial-gradient(2px 2px at 160px 50px,#cfe3ff,#0000),radial-gradient(1px 1px at 60px 150px,#fff,#0000),radial-gradient(1.5px 1.5px at 140px 180px,#fff,#0000);background-size:220px 220px}
+#s2,#s2g{background-image:radial-gradient(2px 2px at 40px 60px,#fff,#0000),radial-gradient(1.5px 1.5px at 150px 120px,#ffe9b0,#0000),radial-gradient(2px 2px at 250px 200px,#fff,#0000),radial-gradient(1px 1px at 100px 250px,#cfe3ff,#0000);background-size:310px 310px;animation:tw 2.8s ease-in-out infinite alternate}
+@keyframes tw{from{opacity:.2}to{opacity:1}}
+header{position:sticky;top:0;z-index:5;background:var(--hd);backdrop-filter:blur(8px);color:var(--ink);padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--ln)}
+header h1{font-size:18px;margin:0;flex:1;min-width:190px}
+input,button{font:inherit}
+header input[type=search]{padding:7px 10px;border-radius:8px;border:1px solid var(--ln);background:var(--card);color:var(--ink);min-width:130px}
+.b{border:0;border-radius:8px;padding:7px 12px;background:var(--ac);color:#fff;cursor:pointer}
+.sw{position:relative;width:76px;height:38px;padding:0;cursor:pointer;border-radius:30px;border:3px solid #0000;background:linear-gradient(var(--hd),var(--hd)) padding-box,linear-gradient(90deg,#ff9a3c,#ff4e50 60%,#9b3fa5) border-box;transition:transform .2s}
+[data-t=dark] .sw{background:linear-gradient(var(--hd),var(--hd)) padding-box,linear-gradient(90deg,#19d8ff,#1e6bff) border-box}
+.sw.go{animation:pulse .7s ease-out}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--glow)}100%{box-shadow:0 0 0 20px #0000}}
+.k{position:absolute;top:1px;left:1px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--nv);background:linear-gradient(135deg,#ffb347,#ff4e50 70%,#9b3fa5);transition:transform .65s cubic-bezier(.68,-.55,.27,1.55),background .5s,scale .15s;box-shadow:0 0 12px var(--glow)}
+[data-t=dark] .k{transform:translateX(38px) rotate(360deg);background:linear-gradient(135deg,#19f0ff,#1e6bff)}
+.sw:active .k{scale:.82}
+.k svg{position:absolute;width:18px;height:18px;transition:opacity .4s,transform .6s}
+.moon{opacity:0;transform:rotate(-90deg) scale(.3)}
+[data-t=dark] .moon{opacity:1;transform:none}
+[data-t=dark] .sun{opacity:0;transform:rotate(90deg) scale(.3)}
+.wrap{overflow-x:auto;padding:12px}
+table{border-collapse:collapse;width:100%;min-width:820px;background:var(--card);border-radius:10px;overflow:hidden;backdrop-filter:blur(6px)}
+th,td{padding:7px 8px;border-bottom:1px solid var(--ln);text-align:center;font-size:14px}
+th{background:var(--th);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td.n{text-align:left;min-width:200px}
+td.n input{border:1px solid var(--ln);border-radius:6px;padding:4px 6px;width:46%;background:#0000;color:var(--ink)}
+.c{display:inline-flex;align-items:center;gap:4px}
+.c button{width:26px;height:26px;border-radius:50%;border:1px solid var(--ln);background:var(--card);color:var(--ink);cursor:pointer;font-size:16px;line-height:1}
+.c button:active{background:var(--ac);color:#fff}
+.c span{min-width:28px;font-weight:600}
+td.t{font-weight:700;font-size:16px}
+#msg{padding:8px 16px;font-size:13px;color:var(--mut)}
+dialog{border:0;border-radius:12px;padding:20px;background:var(--dlg);color:var(--ink)}
+dialog input{display:block;margin:8px 0;padding:8px;width:240px;background:#0000;color:var(--ink);border:1px solid var(--ln);border-radius:6px}
+#who{font-size:13px;font-weight:600}
+#al{padding:0;list-style:none}#al li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--ln)}
+.lk{background:none;border:0;color:var(--ac);cursor:pointer;padding:0;margin-top:6px;font-size:13px}
+#msg:empty{display:none}
+#top{padding:12px 12px 0}
+#top h2{margin:0 0 10px;font-size:17px}
+.tg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tc{background:var(--card);backdrop-filter:blur(6px);border:1px solid var(--ln);border-radius:12px;padding:12px;text-align:center}
+.tc .m{font-size:26px;line-height:1.1;font-weight:700}
+.tc .tn{font-size:14px;margin:4px 0;min-height:2.6em}
+.tc .tp{font-weight:700;font-size:18px;color:var(--ac)}
+.tc.t1{border-color:#f5c542;box-shadow:0 0 18px #f5c54255}
+.tc.t2{border-color:#b8c2cc}.tc.t3{border-color:#d08a4e}
+
+.card{background:var(--card);backdrop-filter:blur(6px);border:1px solid var(--ln);border-radius:14px;padding:18px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:18px}
+.row{display:flex;gap:8px;justify-content:space-between;margin-top:12px}
+.b:disabled{opacity:.45;cursor:not-allowed}
+[hidden]{display:none!important}
+#gate{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden;--ink:#e8eeff;--mut:#9aa8d6;--card:rgba(12,18,48,.86);--ln:#26305e;--ac:#2f7bff;color:var(--ink);background:radial-gradient(circle at 86% 10%,#eaf2ff 0,#b4c8ff 2%,#7f9cff33 7%,#0000 16%),linear-gradient(#03061a,#0b1240 60%,#1a1f5c)}
+#gate .st{position:absolute;inset:0}
+.gc{position:relative;max-width:420px;width:100%;text-align:center}
+.gi{font-size:46px}.gno{background:#e74c3c}
+#gm{font-size:13px;color:var(--mut);min-height:1.3em}
+.gc input{width:100%;padding:9px;border-radius:8px;border:1px solid var(--ln);background:#0000;color:var(--ink);margin:6px 0;font:inherit}
+
+body{display:flex}
+#app{flex:1;min-width:0}
+#side{position:sticky;top:0;align-self:flex-start;height:100vh;width:250px;flex:none;overflow:auto;background:var(--hd);backdrop-filter:blur(8px);border-right:1px solid var(--ln);padding:14px;z-index:6}
+.sh{font-weight:800;font-size:17px;line-height:1.25;margin-bottom:6px}
+.sl{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:16px 0 6px}
+.sr{display:flex;align-items:center}
+.si{flex:1;text-align:left;width:100%;border:0;background:#0000;color:var(--ink);padding:9px 10px;border-radius:10px;cursor:pointer;font:inherit}
+.si:hover{background:var(--th)}.si.on{background:var(--ac);color:#fff}
+.x{margin-left:4px}
+#addc{margin-top:8px}
+#menu{display:none}
+.bar{height:8px;border-radius:6px;background:var(--ln);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--ac);transition:width .5s}
+.gv{padding:14px}.gv h2{margin:0 0 4px}.mut{color:var(--mut);font-size:13px;margin:0 0 12px}
+.rr{display:flex;gap:12px;align-items:center;background:var(--card);backdrop-filter:blur(6px);border:1px solid var(--ln);border-radius:12px;padding:12px;margin-bottom:10px}
+.rm{font-size:22px;min-width:38px;text-align:center;font-weight:700}.rb{flex:1}
+.rt{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.rt span{color:var(--mut);font-size:13px}
+@media(max-width:800px){#side{position:fixed;left:0;top:0;transform:translateX(-105%);transition:transform .35s;box-shadow:8px 0 30px #0006;background:var(--dlg);z-index:40}#side.open{transform:none}#menu{display:inline-block}}
+</style>
+</head>
+<body>
+<div id="day" class="sky"></div>
+<div id="night" class="sky"><div class="st" id="s1"></div><div class="st" id="s2"></div></div>
+<div id="gate" hidden>
+  <div class="st" id="s1g"></div><div class="st" id="s2g"></div>
+  <div class="card gc" id="gv1">
+    <div class="gi">✉️</div><h2>Verifica tu correo</h2>
+    <p>Para entrar debes confirmar que el correo es tuyo. Mientras no lo verifiques, tu acceso queda bloqueado.</p>
+    <p><b id="ge"></b></p>
+    <div id="g1"><p>¿Es tu correo?</p><div class="row"><button class="b" id="gy">Sí, soy yo</button><button class="b gno" id="gn">No, no soy yo</button></div></div>
+    <div id="g2" hidden><div class="row"><button class="b" id="gv">Ya lo verifiqué</button><button class="b" id="gr">Reenviar enlace</button></div></div>
+    <p id="gm"></p>
+    <button class="lk" id="go2">Salir</button>
+  </div>
+  <div class="card gc" id="gv2" hidden>
+    <div class="gi">🔐</div><h2 id="lt"></h2><p id="lx"></p>
+    <input id="le" type="email" placeholder="Tu correo" hidden>
+    <div class="row" id="la"><button class="b" id="ly">Sí, soy yo</button><button class="b gno" id="ln">No, no soy yo</button></div>
+    <div class="row" id="lw"><button class="b" id="lr">Reenviar enlace</button><button class="b" id="lv">Volver</button></div>
+    <p id="lg"></p>
+  </div>
+</div>
+<aside id="side">
+  <div class="sh">🎯 Ranking Cazadores de Puntos</div>
+  <div class="sl">Ciudades:</div>
+  <nav id="cn"></nav>
+  <button class="b" id="addc" hidden>+ Ciudad</button>
+  <div class="sl">Ranking General:</div>
+  <button class="si" id="gen">🏆 Ranking General</button>
+</aside>
+<div id="app">
+<header>
+  <button class="b" id="menu" aria-label="Menú">☰</button>
+  <h1 id="ttl"></h1>
+  <input type="search" id="q" placeholder="Buscar…">
+  <label id="ordl"><input type="checkbox" id="ord"> Ordenar por puntos</label>
+  <button class="b" id="add" hidden>+ Persona</button>
+  <button class="sw" id="th" aria-label="Cambiar entre modo claro y oscuro"><span class="k">
+    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
+    <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/><path d="M17 3l.8 1.7L19.5 5.5l-1.7.8L17 8l-.8-1.7-1.7-.8 1.7-.8z"/></svg>
+  </span></button>
+  <span id="who"></span>
+  <button class="b" id="adm" hidden>Admins</button>
+  <button class="b" id="login">Entrar</button>
+</header>
+<div id="msg"></div>
+<div id="cview"><section id="top"></section>
+<div class="wrap"><table>
+  <thead><tr><th>#</th><th>Nombre</th><th>Mensajes</th><th>Reacciones</th><th>Formularios</th><th>Asistencia</th><th>Extra</th><th>Total</th><th></th></tr></thead>
+  <tbody id="tb"></tbody>
+</table></div></div>
+<section id="gview" class="gv" hidden></section>
+</div>
+<dialog id="dlg">
+  <form method="dialog">
+    <b>Iniciar sesión</b>
+    <input id="em" type="email" placeholder="Correo" autocomplete="username">
+    <input id="pw" type="password" placeholder="Contraseña" autocomplete="current-password">
+    <button class="b" id="go" value="x">Entrar</button>
+    <button class="b" id="reg" value="x">Crear cuenta</button>
+    <button class="b" value="c">Cancelar</button><br>
+    <button class="lk" id="rst" value="x">¿Olvidaste tu contraseña?</button>
+  </form>
+</dialog>
+<dialog id="dadm">
+  <b>Administradores</b>
+  <p style="font-size:13px;color:var(--mut);margin:6px 0">Pueden editar puntos y nombres, pero no asignar roles. La persona debe tener cuenta creada.</p>
+  <input id="ae" type="email" placeholder="correo@ejemplo.com">
+  <button class="b" id="aadd">Agregar admin</button>
+  <ul id="al"></ul>
+  <button class="b" onclick="$('dadm').close()">Cerrar</button>
+</dialog>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+// 1) PEGA AQUÍ la config de tu proyecto Firebase (Configuración del proyecto > Tus apps > Web)
+const CFG={apiKey:"PEGA_AQUI",authDomain:"",projectId:"",appId:""};
+// Owners (deben ser los mismos que en firestore.rules)
+const OWNERS=["bryanandresandrade@gmail.com","vergarabuenoa@gmail.com"];
+
+// Lista inicial: Nombre|Apellidos|Mensajes,Reacciones,Formularios,Asistencia,Extra (vacío = todo 0)
+const SEED=`Fabian David|De La Cruz Quiroz|0,2,5,0,0
+Alejandro José|Tuarez Leon|
+Diego Ignacio|Prudente Jordan|
+Astrid Madellayne|Quintana Regalado|0,0,10,5,0
+Dalton Sadi|Flores Vásquez|2,5,1,0,3
+Erika Gabriela|Arroba López|2,1,1,0,0
+Ada Valeska|Montes Capurro|8,12,6,10,15
+Cristhian Andrés|Sánchez Pacheco|2,8,16,17,15
+Jhustyn Andres|Jiménez Herrera|0,3,6,10,0
+Jonathan Gabriel|Casanova Pinargote|0,2,6,0,18
+Ana Paula|Gualpa Guevara|0,0,0,10,0
+Ángela Valeria|Zambrano Jiménez|
+Arianna Paulette|Jibaja Ramírez|0,1,15,0,0
+Arianna Valeska|Reyes Arboleda|1,5,1,0,0
+Ariel David|Sornoza Villón|
+Ashley Rebeca|Tobar Toro|0,0,0,10,0
+Billy James|Sosa Vargas|1,1,16,0,0
+Borys Moisés|Márquez Aldas|
+Britanny Lucia|Castro Menoscal|
+Brithany Beyonce|Jiménez Adrián|0,1,1,0,0
+Byron Eduardo|Jiménez Rodríguez|0,1,6,0,0
+Carlos Andres|Triana Rivera|0,0,6,10,2
+César Alejandro|Hernández Macias|0,0,0,10,0
+Amy Estefania|Cruz Quilligana|3,10,6,10,0
+Dalma Luciana|Flores Alejandro|0,1,5,0,0
+Daniel Alejandro|Espinoza Macías|0,0,0,10,0
+Danna Stefania|Urdanigo Ochoa|0,0,10,0,0
+Danna Beatriz|Gruezo García|
+Derek Isamel|Palacios Tandazo|1,8,5,11,3
+Domenica Alejandra|Figueroa Silva|0,0,10,10,3
+Natalia Victoria|Poveda Murillo|0,8,5,12,10
+Estrella De Los Angeles|Canelones De Sousa|0,1,5,10,0
+Ezequiel Matias|Flores Alejandro|
+Gabriela Anahi|Ortiz Hurtado|0,0,11,0,0
+Gemma Adelaida|Andrade González|
+Génesis Amanda|Monserrate Cabrera|0,1,1,0,0
+Isaac Jonas|Pin Fienco|
+Israel Jair|Alvarado Vallesteros|
+Jay Janick|Palacios García|0,1,1,0,0
+Jeremy Ismael|Escalante Zambrano|
+Jessenia Lisbeth|Vera Arteaga|
+Jessi Stefania|Aguilar Carpio|
+Joel Ernesto|Porras Ramos|
+Jorge Alessandro|Cornejo Briones|0,0,0,10,0
+Jorge Sebastián|Méndez Indacochea|0,2,0,10,0
+Jose Antonio|Pinto Quintanilla|1,3,6,0,0
+José Carlos|Quiroz Mera|
+Josué Antonio|Plua Barzallo|
+Josue Benjamin|Santamaria Herrera|0,0,5,0,0
+Juan Daniel|Falcones Suango|2,0,10,11,0
+Ken Anthony|Aguírre Crespin|0,4,6,0,0
+Ketty Valeria|Carrera Santacruz|
+Kiabeth Nicole|Porras Ramos|
+Leonela Mirela|Vite Zambrano|0,0,1,0,0
+Leslie Anahi|Muñiz Montesdeoca|
+Marcos Santiago|Macías Pérez|
+Maria Paula|Araujo Munizaga|
+Mathias Jose|Mina Cedeño|
+Maximiliano Paul|Lara Litardo|2,3,5,0,0
+Megan Arianna|Saquisili Fuentes|1,9,1,0,0
+Melanie Jamileth|Posligua Suárez|
+Merely Isbeth|Pulig Chicaiza|0,0,10,10,0
+Michael Saúl|Navarrete Gilces|
+Misael|Gonzalez Torres|7,7,6,2,0
+Neyder Jefferson|Mayorga Vite|0,1,0,0,0
+Niko Leonardo|Benítez Vitriago|0,0,0,10,0
+Nina Del Carmen|Cifuentes Sánchez|0,1,11,10,0
+Paula Elaine|Basilio Cárdenas|
+Pilar Amelia|Macías Lucas|0,0,5,0,0
+Samantha Aurora|Brito Jimenez|0,0,5,0,0
+Samuel Ignacio|Teran Fiallos|0,0,5,0,1.5
+Santiago David|Ramirez Coronel|0,0,5,0,0
+Scarleth María|Cerruffo Castro|0,2,1,0,0
+Valentina De Los Angeles|Gonzalez Santillán|
+Valeria Azucena|Campuzano Vaca|
+Victoria Natania|Pareja Leoro|0,2,1,10,0
+Yerico Steven|Gabino Zambrano|8,0,5,3,0`.split("\n").map(l=>{const[n,a,p]=l.split("|");return{n,a,p:p?p.split(",").map(Number):[0,0,0,0,0]}});
+
+const $=id=>document.getElementById(id);
+const root=document.documentElement;
+function setT(t){root.dataset.t=t;$("th").setAttribute("aria-pressed",t=="dark");document.querySelector("meta[name=theme-color]").content=t=="dark"?"#06113a":"#7cc8ff";try{localStorage.setItem("tema",t)}catch(e){}}
+setT(localStorage.getItem("tema")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"));
+$("th").onclick=()=>{const b=$("th");b.classList.remove("go");void b.offsetWidth;b.classList.add("go");setT(root.dataset.t=="dark"?"light":"dark")};
+
+const DEF=["Guayaquil","Quito","Panama","Barranquilla","Uruguay","Bogota","Cali","Cartagena","Medellin"];
+const slug=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,30);
+const online=CFG.apiKey&&!CFG.apiKey.startsWith("PEGA");
+let cs=[],cur="",virtual=true,legacy=null,docs=null,initing=false,legacyDone=false,me=null,role=null,auth,db,iniErr="";
+let pend=false,lmode="",lmail="",lmsg="",sentAt=0;
+const edit=()=>!!role&&!virtual;
+const city=()=>cs.find(c=>c.id==cur);
+const tot=r=>r.p.reduce((s,x)=>s+x,0);
+const fmt=x=>Number.isInteger(x)?x:x.toFixed(1).replace(".",",");
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function clean(x,fb){try{const a=JSON.parse(x);if(!Array.isArray(a))throw 0;
+  return a.slice(0,500).map(r=>({n:String(r.n||"").slice(0,80),a:String(r.a||"").slice(0,80),
+    p:[0,1,2,3,4].map(i=>{const v=Number(r.p&&r.p[i]);return isFinite(v)&&v>=0&&v<=100000?v:0})}))}catch(e){return fb}}
+
+function build(){
+  if(docs&&docs.length){virtual=false;cs=docs.map(d=>({id:d.id,n:String(d.data().n||d.id).slice(0,30),o:+d.data().o||0,rows:clean(d.data().json,[])}))}
+  else{virtual=true;cs=DEF.map((n,i)=>({id:slug(n),n,o:i,rows:i==0?(legacy||SEED):[]}))}
+  if(cur!="general"&&!city())cur=cs[0]?cs[0].id:"general";
+  maybeInit();render();
+}
+async function maybeInit(){ // el Owner activa las ciudades la primera vez (Guayaquil conserva la lista actual)
+  if(!online||!virtual||role!="owner"||initing||!legacyDone)return;initing=true;
+  try{const b=db.batch();cs.forEach(c=>b.set(db.collection("ciudades").doc(c.id),{n:c.n,o:c.o,json:JSON.stringify(c.rows)}));await b.commit()}
+  catch(e){alert("No se pudieron activar las ciudades: "+(e.code||e.message))}
+  initing=false;
+}
+function save(){
+  const c=city();if(!online||!edit()||!c)return;
+  db.collection("ciudades").doc(c.id).update({json:JSON.stringify(c.rows)}).catch(async e=>{
+    alert("No se pudo guardar.\nError: "+(e.code||e.message)+"\n\nRevisa que las reglas de Firestore estén publicadas y que tu correo esté verificado.");
+    try{const d=await db.collection("ciudades").doc(c.id).get();if(d.exists)c.rows=clean(d.data().json,c.rows)}catch(_){}
+    render();
+  });
+}
+function render(){
+  const g=cur=="general",c=city(),rows=c?c.rows:[],own=role=="owner"&&!virtual;
+  $("cn").innerHTML=cs.map(x=>`<div class="sr"><button class="si${x.id==cur?" on":""}" data-c="${esc(x.id)}">${esc(x.n)}</button>${own?`<button class="lk x" data-x="${esc(x.id)}" title="Quitar ciudad">✕</button>`:""}</div>`).join("");
+  $("gen").classList.toggle("on",g);$("addc").hidden=!own;
+  $("ttl").textContent=g?"🏆 Ranking General":c?"🎯 "+c.n:"Cargando…";
+  $("cview").hidden=g;$("gview").hidden=!g;$("q").hidden=$("ordl").hidden=g;$("add").hidden=g||!edit();
+  if(g){
+    const rk=cs.map(x=>({n:x.n,t:x.rows.reduce((s,r)=>s+tot(r),0),k:x.rows.length})).sort((a,b)=>b.t-a.t),mx=Math.max(1,...rk.map(r=>r.t)),md=["🥇","🥈","🥉"];
+    $("gview").innerHTML=`<h2>🏆 Ranking General</h2><p class="mut">Suma de los puntos de cada ciudad. Los puntos de una ciudad no se mezclan con los de otra.</p>`+rk.map((r,i)=>`<div class="rr"><div class="rm">${md[i]||(i+1)+"°"}</div><div class="rb"><div class="rt"><b>${esc(r.n)}</b><span>${fmt(r.t)} pts · ${r.k} personas</span></div><div class="bar"><i style="width:${r.t/mx*100}%"></i></div></div></div>`).join("");
+  }else{
+    const top=[...rows].sort((a,b)=>tot(b)-tot(a)).filter(r=>tot(r)>0).slice(0,5),md=["🥇","🥈","🥉","4°","5°"];
+    $("top").innerHTML=`<h2>🏆 Top 5 Cazadores de Puntos</h2><div class="tg">`+(top.length?top.map((r,i)=>`<div class="tc t${i+1}"><div class="m">${md[i]}</div><div class="tn">${esc(r.n)} ${esc(r.a)}</div><div class="tp">${fmt(tot(r))} pts</div></div>`).join(""):"<p>Aún no hay puntos.</p>")+`</div>`;
+    const q=$("q").value.toLowerCase();
+    let ix=rows.map((r,i)=>i);
+    if($("ord").checked)ix.sort((a,b)=>tot(rows[b])-tot(rows[a]));
+    ix=ix.filter(i=>(rows[i].n+" "+rows[i].a).toLowerCase().includes(q));
+    const E=edit();
+    $("tb").innerHTML=ix.map((i,k)=>{const r=rows[i];
+      const nm=E?`<input value="${esc(r.n)}" data-i="${i}" data-f="n"> <input value="${esc(r.a)}" data-i="${i}" data-f="a">`:`${esc(r.n)} ${esc(r.a)}`;
+      const cells=r.p.map((v,j)=>{const s=j==4?.5:1;
+        return `<td>${E?`<div class="c"><button data-i="${i}" data-j="${j}" data-d="${-s}">−</button><span>${fmt(v)}</span><button data-i="${i}" data-j="${j}" data-d="${s}">+</button></div>`:fmt(v)}</td>`}).join("");
+      return `<tr><td>${k+1}</td><td class="n">${nm}</td>${cells}<td class="t">${fmt(tot(r))}</td><td>${E?`<button class="lk" data-del="${i}" title="Quitar persona">✕</button>`:""}</td></tr>`}).join("")||`<tr><td colspan="9">Aún no hay personas en esta ciudad.</td></tr>`;
+  }
+  $("login").textContent=me?"Salir":"Entrar";
+  $("adm").hidden=role!="owner";
+  $("who").textContent=role=="owner"?"👑 Owner":role=="admin"?"🛠️ Admin":"";
+  $("msg").textContent=!online?"Falta configurar Firebase: la lista es solo de lectura.":iniErr?"No se pudo iniciar Firebase: "+iniErr:role=="owner"&&virtual&&!legacyDone?"Cargando la lista actual…":virtual&&role&&role!="owner"?"El Owner debe iniciar sesión primero para activar las ciudades.":edit()?"Modo edición activo.":me&&me.emailVerified?"Tu cuenta no tiene permisos de edición. Pide al Owner que te agregue como admin.":"";
+  gate();
+}
+// ---- Barra lateral ----
+$("menu").onclick=()=>$("side").classList.toggle("open");
+$("side").onclick=async e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.x){
+    const c=cs.find(x=>x.id==b.dataset.x);if(!c)return;
+    if(!confirm("¿Quitar la ciudad "+c.n+"? Se borrarán también sus "+c.rows.length+" personas y todos sus puntos."))return;
+    if(!confirm("Esta acción no se puede deshacer. ¿Seguro?"))return;
+    try{await db.collection("ciudades").doc(c.id).delete()}catch(err){alert("No se pudo quitar: "+(err.code||err.message))}
+    return;
+  }
+  if(b.id=="addc"){
+    const n=(prompt("Nombre de la ciudad:")||"").trim().slice(0,30),id=slug(n);
+    if(!n)return;if(!id)return alert("Nombre no válido.");if(cs.some(x=>x.id==id))return alert("Esa ciudad ya existe.");
+    try{await db.collection("ciudades").doc(id).set({n,o:Date.now(),json:"[]"});cur=id;render()}catch(err){alert("No se pudo agregar: "+(err.code||err.message))}
+    return;
+  }
+  if(b.id=="gen")cur="general";else if(b.dataset.c)cur=b.dataset.c;else return;
+  $("side").classList.remove("open");render();scrollTo(0,0);
+};
+// ---- Tabla ----
+$("tb").addEventListener("click",e=>{
+  const c=city();if(!c||!edit())return;
+  const d=e.target.closest("button[data-del]");
+  if(d){const r=c.rows[d.dataset.del];if(r&&confirm("¿Quitar a "+r.n+" "+r.a+" de "+c.n+"? Se borrarán sus puntos.")){c.rows.splice(+d.dataset.del,1);save();render()}return}
+  const b=e.target.closest("button[data-d]");if(!b)return;
+  const r=c.rows[b.dataset.i],j=+b.dataset.j;
+  r.p[j]=Math.max(0,r.p[j]+ +b.dataset.d);save();render();
+});
+$("tb").addEventListener("change",e=>{
+  const t=e.target,c=city();if(!c||!edit()||!t.dataset.f)return;
+  c.rows[t.dataset.i][t.dataset.f]=t.value.trim();save();
+});
+$("q").oninput=$("ord").onchange=render;
+$("add").onclick=()=>{const c=city();if(!c||!edit())return;const n=prompt("Nombres:");if(!n)return;const a=prompt("Apellidos:")||"";c.rows.push({n:n.trim(),a:a.trim(),p:[0,0,0,0,0]});save();render();};
+
+// ---- Verificación por correo ----
+const gmsg=t=>$("gm").textContent=t;
+function gate(){
+  const un=!!(me&&!me.emailVerified);
+  $("gate").hidden=!(un||lmode);$("gv1").hidden=!un||!!lmode;$("gv2").hidden=!lmode;
+  if(lmode){
+    const w=lmode=="wait",a=lmode=="ask";
+    $("lt").textContent=w?"Confirma tu inicio de sesión":a?"¿Eres tú?":"Acceso protegido";
+    $("lx").textContent=w?"Te enviamos un enlace a "+lmail+". Ábrelo para terminar de entrar (revisa también spam).":a?"Alguien quiere entrar con este correo. Si fuiste tú, confirma para entrar.":lmsg;
+    $("la").hidden=!a;$("lw").hidden=a;$("lr").hidden=!w;$("le").hidden=!(a&&!localStorage.lkm);$("lg").textContent="";
+  }else if(un){$("ge").textContent=me.email;$("g1").hidden=false;$("g2").hidden=true;gmsg(Date.now()-sentAt<6e4?"Ya te enviamos un enlace a este correo. Ábrelo (revisa también spam) y luego confirma aquí.":"")}
+}
+async function auto(u){if(u.emailVerified)return;try{await u.sendEmailVerification();sentAt=Date.now();gate()}catch(e){}}
+async function enviar(){
+  $("gy").disabled=$("gr").disabled=true;
+  try{if(Date.now()-sentAt>6e4){await me.sendEmailVerification();sentAt=Date.now()}$("g1").hidden=true;$("g2").hidden=false;gmsg("Te enviamos un enlace a "+me.email+". Ábrelo (revisa también spam) y luego pulsa «Ya lo verifiqué».")}
+  catch(e){gmsg(e.code=="auth/too-many-requests"?"Demasiados intentos. Espera unos minutos.":"No se pudo enviar el correo.")}
+  setTimeout(()=>{$("gy").disabled=$("gr").disabled=false},60000);
+}
+$("gy").onclick=$("gr").onclick=enviar;
+$("gv").onclick=async()=>{try{await me.reload();if(me.emailVerified){await me.getIdToken(true);location.reload()}else gmsg("Aún no está verificado. Abre el enlace del correo e inténtalo de nuevo.")}catch(e){gmsg("No se pudo comprobar. Intenta de nuevo.")}};
+$("gn").onclick=async()=>{
+  if(!confirm("Se eliminará esta cuenta y se bloqueará el acceso. ¿Continuar?"))return;
+  let del=true;try{await me.delete()}catch(e){del=false}
+  await auth.signOut().catch(()=>{});
+  alert(del?"Acceso bloqueado: la cuenta fue eliminada porque el correo no era tuyo.":"Saliste de la sesión. Esa cuenta no tiene acceso mientras no se verifique el correo.");
+};
+$("go2").onclick=()=>auth.signOut();
+const need=()=>{if(auth)return true;alert("Firebase no se inició. "+(iniErr||"Recarga la página con Ctrl+F5."));return false};
+const cred=()=>[$("em").value.trim(),$("pw").value];
+const lurl=()=>{history.replaceState(null,"",location.pathname)};
+async function enviarLink(m){
+  try{await auth.sendSignInLinkToEmail(m,{url:location.origin+location.pathname,handleCodeInApp:true});localStorage.setItem("lkm",m);lmail=m;lmode="wait";gate()}
+  catch(e){alert("No se pudo enviar el enlace: "+(e.code=="auth/operation-not-allowed"?"activa «Vínculo de correo electrónico» en Firebase (Authentication > Método de acceso > Correo/contraseña).":e.code=="auth/unauthorized-continue-uri"?"agrega tu dominio en Authentication > Configuración > Dominios autorizados.":(e.code||e.message)))}
+}
+$("login").onclick=()=>{
+  if(!online)return alert("Aún falta pegar la configuración de Firebase en index.html (línea const CFG=).");
+  if(!need())return;
+  me?auth.signOut():$("dlg").showModal();
+};
+$("go").onclick=async()=>{
+  if(!need())return;const[m,p]=cred();if(!m||!p)return alert("Escribe tu correo y tu contraseña.");
+  pend=true;
+  try{
+    const c=await auth.signInWithEmailAndPassword(m,p);
+    if(c.user.emailVerified){await auth.signOut();pend=false;await enviarLink(m)}
+    else{pend=false;auto(c.user)}
+  }catch(e){pend=false;alert(e.code=="auth/too-many-requests"?"Demasiados intentos. Espera unos minutos.":"Correo o contraseña incorrectos.")}
+};
+$("reg").onclick=async()=>{
+  if(!need())return;const[m,p]=cred();if(!m||p.length<6)return alert("Escribe un correo y una contraseña de al menos 6 caracteres.");
+  try{const c=await auth.createUserWithEmailAndPassword(m,p);auto(c.user)}
+  catch(e){alert("No se pudo crear la cuenta: "+(e.code=="auth/email-already-in-use"?"ese correo ya tiene una cuenta.":e.message))}
+};
+$("rst").onclick=()=>{if(!need())return;const m=$("em").value.trim();if(!m)return alert("Escribe tu correo primero.");auth.sendPasswordResetEmail(m).then(()=>alert("Te enviamos un correo para restablecerla."))};
+$("ly").onclick=async()=>{
+  const m=localStorage.lkm||$("le").value.trim();if(!m)return $("lg").textContent="Escribe tu correo.";
+  try{await auth.signInWithEmailLink(m,location.href);localStorage.removeItem("lkm");lurl();lmode="";render()}
+  catch(e){$("lg").textContent="El enlace no es válido o ya venció. Inicia sesión de nuevo."}
+};
+$("ln").onclick=async()=>{
+  const m=localStorage.lkm||$("le").value.trim();
+  if(m)await auth.sendPasswordResetEmail(m).catch(()=>{});
+  localStorage.removeItem("lkm");lurl();lmode="end";lmsg="Listo: nadie entró con tu cuenta. Por seguridad te enviamos un correo para cambiar tu contraseña.";gate();
+};
+$("lr").onclick=()=>{$("lr").disabled=true;enviarLink(lmail);setTimeout(()=>$("lr").disabled=false,60000)};
+$("lv").onclick=()=>{lmode="";gate()};
+
+// ---- Admins (solo Owner) ----
+async function loadAdmins(){
+  const q=await db.collection("admins").get();
+  $("al").innerHTML=q.docs.map(d=>`<li>${esc(d.id)} <button class="lk" data-e="${esc(d.id)}">Quitar</button></li>`).join("")||"<li>Aún no hay admins</li>";
+}
+$("adm").onclick=()=>{loadAdmins();$("dadm").showModal();};
+$("aadd").onclick=async()=>{const m=$("ae").value.trim().toLowerCase();if(!m)return;
+  await db.collection("admins").doc(m).set({por:me.email}).catch(()=>alert("Solo el Owner puede hacer esto."));$("ae").value="";loadAdmins();};
+$("al").onclick=async e=>{const m=e.target.dataset.e;if(!m||!confirm("¿Quitar a "+m+"?"))return;
+  await db.collection("admins").doc(m).delete();loadAdmins();};
+
+// ---- Arranque ----
+if(online){try{
+  if(typeof firebase==="undefined"||!firebase.auth||!firebase.firestore)throw new Error("No se cargaron los archivos de Firebase (revisa tu conexión, un bloqueador de anuncios o el archivo _headers).");
+  firebase.initializeApp(CFG);auth=firebase.auth();db=firebase.firestore();
+  if(auth.isSignInWithEmailLink(location.href)){lmode="ask";lmail=localStorage.lkm||""}
+  db.collection("puntos").doc("lista").get().then(s=>{legacy=s.exists?clean(s.data().json,SEED):null;legacyDone=true;if(virtual)build()}).catch(()=>{});
+  db.collection("ciudades").orderBy("o").onSnapshot(s=>{docs=s.docs;build()},()=>{});
+  auth.onAuthStateChanged(async u=>{
+    if(pend&&u&&u.emailVerified)return;
+    me=u;role=null;
+    if(u&&u.emailVerified){try{await u.getIdToken(true)}catch(e){}const m=u.email.toLowerCase();
+      if(OWNERS.map(x=>x.toLowerCase()).includes(m))role="owner";
+      else{try{if((await db.collection("admins").doc(m).get()).exists)role="admin"}catch(e){}}}
+    maybeInit();render();
+  });
+}catch(e){iniErr=e.message||String(e);build()}}else build();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>

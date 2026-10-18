@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Solo cuentas con correo VERIFICADO cuentan como identidad válida
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function mail() { return request.auth.token.email.lower(); }
+
+    function isOwner() {
+      return signedIn() && mail() in [
+        "bryanandresandrade@gmail.com",
+        "vergarabuenoa@gmail.com"
+      ];
+    }
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(mail()));
+    }
+    function validC(d) {
+      return d.keys().hasOnly(['n','o','json'])
+        && d.n is string && d.n.size() >= 1 && d.n.size() <= 30
+        && d.o is number
+        && d.json is string && d.json.size() < 100000;
+    }
+
+    // Ciudades: todos leen. El Owner las crea y borra. Owner y Admins editan los puntos,
+    // pero solo el Owner puede cambiar el nombre u orden.
+    match /ciudades/{id} {
+      allow read: if true;
+      allow create: if isOwner() && id.matches('[a-z0-9-]+') && validC(request.resource.data);
+      allow update: if validC(request.resource.data)
+        && (isOwner() || (isAdmin()
+              && request.resource.data.n == resource.data.n
+              && request.resource.data.o == resource.data.o));
+      allow delete: if isOwner();
+    }
+
+    // Lista antigua (solo lectura, se usa una vez para pasar Guayaquil a las ciudades)
+    match /puntos/lista {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Admins: solo el Owner los gestiona; cada admin puede consultar su propio registro
+    match /admins/{email} {
+      allow get: if signedIn() && (isOwner() || mail() == email);
+      allow list: if isOwner();
+      allow create, update, delete: if isOwner();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
